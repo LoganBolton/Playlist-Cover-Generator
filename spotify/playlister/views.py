@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import TodoItem
 from django.views.decorators.http import require_POST
+from .utils import driver
 import requests
 
 def index(request):
@@ -29,3 +30,8 @@ def get_joke(request):
     
     todo_list = TodoItem.objects.order_by('id')
     return render(request, 'playlister/index.html', {'todo_list': todo_list, 'joke': joke})
+
+def generate_image(request):
+    image_url = driver(1234)  # Call the driver function to get the image URL
+    
+    return render(request, 'playlister/display_image.html', {'image_url': image_url})

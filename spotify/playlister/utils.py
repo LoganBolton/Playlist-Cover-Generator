@@ -1,29 +1,13 @@
 import requests
 import base64
-import json
-import os
-from statistics import mean
 import os
 import anthropic
 import base64
-import re
-import sys
-from io import StringIO
-import ast
-import glob 
-import shutil
-import datetime
-import json
 from anthropic import Anthropic
 from PIL import Image
-import matplotlib.pyplot as plt
-import numpy as np
-import math
-from PIL import Image, ImageDraw
-import io
 import replicate
-from IPython.display import Image, display
 import requests
+from statistics import mean  # Add this import at the beginning of your file
 
 # Claude
 def set_up_claude():
@@ -88,6 +72,33 @@ def set_up_spotify():
     
 # Authentication
 def get_token():
+    CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
+    CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
+
+    if not CLIENT_ID or not CLIENT_SECRET:
+        print("Error: SPOTIFY_CLIENT_ID and/or SPOTIFY_CLIENT_SECRET environment variables are not set.")
+        exit(1)
+
+    auth_string = f"{CLIENT_ID}:{CLIENT_SECRET}"
+    auth_bytes = auth_string.encode("utf-8")
+    auth_base64 = str(base64.b64encode(auth_bytes), "utf-8")
+
+    url = "https://accounts.spotify.com/api/token"
+    headers = {
+        "Authorization": "Basic " + auth_base64,
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    data = {"grant_type": "client_credentials"}
+    result = requests.post(url, headers=headers, data=data)
+    json_result = result.json()
+    token = json_result.get("access_token")
+
+    if not token:
+        print("Error: Could not retrieve Spotify token.")
+        exit(1)
+
+    return token
+
     auth_string = f"{CLIENT_ID}:{CLIENT_SECRET}"
     auth_bytes = auth_string.encode("utf-8")
     auth_base64 = str(base64.b64encode(auth_bytes), "utf-8")
@@ -216,10 +227,10 @@ def driver(PLAYLIST_ID):
     set_up_claude()
     set_up_spotify()
     
-    bossa = '6cGZkPs8wimEZBDzpVNaut'
-    jazz = '71vvwEbxgXqHZ7ONA6WGxt'
+    # bossa = '6cGZkPs8wimEZBDzpVNaut'
+    # jazz = '71vvwEbxgXqHZ7ONA6WGxt'
     PLAYLIST_ID = '2djCZlngGykIYIvhRtPq39'
-    playlist_description = get_playlist_details(jazz)
+    playlist_description = get_playlist_details(PLAYLIST_ID)
     prompt = f"""Give me a prompt that will be able represent this playlist in a latent diffusion model. Make it minimalist and abstract but still keep it interesting. I don't want hotel art level minimalism, I want something raw and artistic. If relevant, incorporate imagery that relates to the specific songs or artists. Put your description in square brackets like this [description].\n\n{playlist_description}"""
     
     convo = get_conversation(prompt)
@@ -239,9 +250,4 @@ def driver(PLAYLIST_ID):
     print(output)
     image_url = output[0]
 
-    # Download the image
-    response = requests.get(image_url)
-    image_data = response.content
-
-    # Display the image
-    display(Image(image_data))
+    return image_url
