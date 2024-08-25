@@ -4,8 +4,7 @@ from .views import generate_image
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('add', views.add_todo, name='add'),
-    path('complete/<int:todo_id>/', views.complete_todo, name='complete'),
-    path('joke', views.get_joke, name='get_joke'),
-    path('generate-image/', generate_image, name='generate_image')
+    path('generate-image/<str:playlist_id>/', generate_image, name='generate_image'),
+    path('playlists/', views.get_playlists, name='playlists'),
+    
 ]

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import TodoItem
 from django.views.decorators.http import require_POST
+from django.conf import settings
 from .utils import driver
 import requests
 
@@ -8,30 +9,26 @@ def index(request):
     todo_list = TodoItem.objects.order_by('id')
     return render(request, 'playlister/index.html', {'todo_list': todo_list})
 
-@require_POST
-def add_todo(request):
-    title = request.POST['title']
-    TodoItem.objects.create(title=title)
-    return redirect('index')
+def generate_image(request, playlist_id):
+    # prompt = driver(playlist_id)  # Call the driver function to get the image URL
+    prompt = "testing debug prompt mmmm I love prompting language models with dynamic data mmmm " + playlist_id 
+    image_url = ""
+    # return render(request, 'playlister/display_image.html', {'image_url': image_url})
+    return render(request, 'playlister/display_image.html', {'playlist_id': playlist_id, 'prompt': prompt, 'image_url': image_url})
 
-def complete_todo(request, todo_id):
-    todo = TodoItem.objects.get(pk=todo_id)
-    todo.completed = True
-    todo.save()
-    return redirect('index')
+def get_playlists(request):
+    # Ideally, you'd store this securely and refresh when needed
+    access_token = settings.SPOTIFY_ACCESS_TOKEN
 
-def get_joke(request):
-    response = requests.get('https://official-joke-api.appspot.com/random_joke')
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+    }
+
+    response = requests.get('https://api.spotify.com/v1/me/playlists', headers=headers)
+    
     if response.status_code == 200:
-        joke_data = response.json()
-        joke = f"{joke_data['setup']} ... {joke_data['punchline']}"
+        playlists = response.json()['items']
+        return render(request, 'playlister/playlists.html', {'playlists': playlists})
     else:
-        joke = "Failed to fetch a joke. Please try again later."
-    
-    todo_list = TodoItem.objects.order_by('id')
-    return render(request, 'playlister/index.html', {'todo_list': todo_list, 'joke': joke})
-
-def generate_image(request):
-    image_url = driver(1234)  # Call the driver function to get the image URL
-    
-    return render(request, 'playlister/display_image.html', {'image_url': image_url})
+        error_message = f"Failed to fetch playlists: {response.status_code} {response.text}"
+        return render(request, 'playlister/playlists.html', {'error': error_message})

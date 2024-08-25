@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Spotify Playlists</title>
+</head>
+<body>
+    <h1>My Spotify Playlists</h1>
+    {% if error %}
+        <p>{{ error }}</p>
+    {% else %}
+        <ul>
+        {% for playlist in playlists %}
+            <li>
+                <img src="{{ playlist.images.0.url }}" alt="{{ playlist.name }}" width="60" height="60">
+                <a href="{{ playlist.external_urls.spotify }}">{{ playlist.name }}</a>
+                ({{ playlist.tracks.total }} tracks)
+                <a href="{% url 'generate_image' playlist_id=playlist.id %}">Generate Cover</a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>

@@ -17,37 +17,7 @@
     </style>
 </head>
 <body>
-    <h1>Todo List</h1>
-    <form action="{% url 'add' %}" method="POST">
-        {% csrf_token %}
-        <input type="text" name="title" placeholder="Add a new todo item">
-        <input type="submit" value="Add">
-    </form>
-    <ul>
-        {% for todo in todo_list %}
-            <li{% if todo.completed %} class="completed"{% endif %}>
-                {{ todo.title }}
-                {% if not todo.completed %}
-                    <form style="display: inline;" action="{% url 'complete' todo.id %}" method="POST">
-                        {% csrf_token %}
-                        <input type="submit" value="Complete">
-                    </form>
-                {% endif %}
-            </li>
-        {% empty %}
-            <li>No todos yet.</li>
-        {% endfor %}
-    </ul>
-    
-    <form action="{% url 'get_joke' %}" method="GET">
-        <input type="submit" value="Get a Joke">
-    </form>
-    
-    {% if joke %}
-        <div class="joke-container">
-            <h3>Here's a joke for you:</h3>
-            <p>{{ joke }}</p>
-        </div>
-    {% endif %}
+    <h1>Home Index</h1>
+    <a href="{% url 'playlists' %}">My Spotify Playlists</a>
 </body>
 </html>

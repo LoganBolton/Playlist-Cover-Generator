@@ -236,18 +236,21 @@ def driver(PLAYLIST_ID):
     convo = get_conversation(prompt)
     response = send_message(convo)
     description = extract_description(response)
-    print(description)
-    output = replicate.run(
-        "black-forest-labs/flux-schnell",
-        input={
-            "prompt": description,
-            "num_outputs": 1,
-            "aspect_ratio": "1:1",
-            "output_format": "webp",
-            "output_quality": 80
-        }
-    )
-    print(output)
-    image_url = output[0]
+    return description
 
-    return image_url
+    #temporarily commented out 
+    # print(description)
+    # output = replicate.run(
+    #     "black-forest-labs/flux-schnell",
+    #     input={
+    #         "prompt": description,
+    #         "num_outputs": 1,
+    #         "aspect_ratio": "1:1",
+    #         "output_format": "webp",
+    #         "output_quality": 80
+    #     }
+    # )
+    # print(output)
+    # image_url = output[0]
+
+    # return image_url
