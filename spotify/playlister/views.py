@@ -8,6 +8,16 @@ from django.conf import settings
 import requests
 import time
 import base64
+from django.core.cache import cache
+from django.core.exceptions import ImproperlyConfigured
+
+from django.conf import settings
+from django.shortcuts import redirect
+from django.http import HttpResponse
+from django.urls import reverse
+import requests
+import base64
+import urllib.parse
 
 def index(request):
     todo_list = TodoItem.objects.order_by('id')
@@ -19,6 +29,69 @@ def generate_image(request, playlist_id):
     image_url = ""
     # return render(request, 'playlister/display_image.html', {'image_url': image_url})
     return render(request, 'playlister/display_image.html', {'playlist_id': playlist_id, 'prompt': prompt, 'image_url': image_url})
+
+def spotify_auth(request):
+    client_id = settings.SPOTIFY_CLIENT_ID
+    redirect_uri = 'http://127.0.0.1:8081/callback'  # Updated to match your server
+    scope = 'playlist-read-private playlist-read-collaborative'
+
+    print(f"Redirect URI: {redirect_uri}")  # For debugging
+
+    auth_url = 'https://accounts.spotify.com/authorize?' + urllib.parse.urlencode({
+        'response_type': 'code',
+        'client_id': client_id,
+        'scope': scope,
+        'redirect_uri': redirect_uri,
+    })
+
+    return redirect(auth_url)
+
+def spotify_callback(request):
+    code = request.GET.get('code')
+    
+    if not code:
+        return HttpResponse("Authorization failed: No code received")
+
+    client_id = settings.SPOTIFY_CLIENT_ID
+    client_secret = settings.SPOTIFY_CLIENT_SECRET
+    redirect_uri = 'http://127.0.0.1:8081/callback'  # Updated to match your server
+
+    print(f"Callback Redirect URI: {redirect_uri}")  # For debugging
+
+    token_url = 'https://accounts.spotify.com/api/token'
+    authorization = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+
+    headers = {
+        'Authorization': f'Basic {authorization}',
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+
+    data = {
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': redirect_uri
+    }
+
+    response = requests.post(token_url, headers=headers, data=data)
+    token_info = response.json()
+
+    print(f"Token Info: {token_info}")  # For debugging
+
+    if 'error' in token_info:
+        return HttpResponse(f"Error: {token_info['error']}")
+
+    access_token = token_info.get('access_token')
+    refresh_token = token_info.get('refresh_token')
+
+    if not access_token or not refresh_token:
+        return HttpResponse("Failed to obtain tokens")
+
+    request.session['spotify_access_token'] = access_token
+    request.session['spotify_refresh_token'] = refresh_token
+
+    print(f"Session after storing tokens: {dict(request.session)}")  # For debugging
+
+    return HttpResponse("Authorization successful! Tokens have been saved.")
 
 class SpotifyTokenManager:
     @staticmethod
