@@ -7,6 +7,7 @@ import requests
 from django.conf import settings
 import requests
 import time
+import base64
 
 def index(request):
     todo_list = TodoItem.objects.order_by('id')
@@ -19,57 +20,84 @@ def generate_image(request, playlist_id):
     # return render(request, 'playlister/display_image.html', {'image_url': image_url})
     return render(request, 'playlister/display_image.html', {'playlist_id': playlist_id, 'prompt': prompt, 'image_url': image_url})
 
-class SpotifyAuth:
-    def __init__(self, client_id, client_secret, refresh_token):
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.refresh_token = refresh_token
-        self.access_token = settings.SPOTIFY_ACCESS_TOKEN
-        self.token_expiration = 0  # We'll assume the token is expired initially
+class SpotifyTokenManager:
+    @staticmethod
+    def get_token(request):
+        # Try to get the token from cache
+        access_token = cache.get('spotify_access_token')
+        if access_token:
+            return access_token
+        
+        # If not in cache, refresh the token
+        return SpotifyTokenManager.refresh_token(request)
 
-    def get_access_token(self):
-        if time.time() > self.token_expiration:
-            self.refresh_access_token()
-        return self.access_token
-
-    def refresh_access_token(self):
+    @staticmethod
+    def refresh_token(request):
         token_url = "https://accounts.spotify.com/api/token"
+        refresh_token = request.session.get('spotify_refresh_token')
+        client_id = settings.SPOTIFY_CLIENT_ID
+        client_secret = settings.SPOTIFY_CLIENT_SECRET
+
+        if not refresh_token:
+            raise Exception("No refresh token available")
+
+        client_creds = f"{client_id}:{client_secret}"
+        client_creds_b64 = base64.b64encode(client_creds.encode()).decode()
+
+        headers = {
+            "Authorization": f"Basic {client_creds_b64}"
+        }
+
         data = {
             "grant_type": "refresh_token",
-            "refresh_token": self.refresh_token,
-            "client_id": self.client_id,
-            "client_secret": self.client_secret
+            "refresh_token": refresh_token
         }
-        response = requests.post(token_url, data=data)
+
+        response = requests.post(token_url, headers=headers, data=data)
+        
         if response.status_code == 200:
             token_info = response.json()
-            self.access_token = token_info["access_token"]
-            self.token_expiration = time.time() + token_info["expires_in"]
-            # Update the access token in settings
-            settings.SPOTIFY_ACCESS_TOKEN = self.access_token
+            access_token = token_info['access_token']
+            expires_in = token_info['expires_in']
+
+            # Cache the new token
+            cache.set('spotify_access_token', access_token, expires_in - 300)  # Cache for token lifetime minus 5 minutes
+
+            # Update the session with the new access token
+            request.session['spotify_access_token'] = access_token
+
+            # If a new refresh token is provided, update it in the session
+            if 'refresh_token' in token_info:
+                request.session['spotify_refresh_token'] = token_info['refresh_token']
+
+            return access_token
         else:
             raise Exception("Failed to refresh access token")
 
-# Initialize the SpotifyAuth object
-spotify_auth = SpotifyAuth(
-    settings.SPOTIFY_CLIENT_ID,
-    settings.SPOTIFY_CLIENT_SECRET,
-    settings.SPOTIFY_REFRESH_TOKEN
-)
-
 def get_playlists(request):
-    # Ideally, you'd store this securely and refresh when needed
-    access_token = settings.SPOTIFY_ACCESS_TOKEN
+    try:
+        # Get a fresh token
+        access_token = SpotifyTokenManager.get_token(request)
 
-    headers = {
-        'Authorization': f'Bearer {access_token}',
-    }
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+        }
 
-    response = requests.get('https://api.spotify.com/v1/me/playlists', headers=headers)
-    
-    if response.status_code == 200:
-        playlists = response.json()['items']
-        return render(request, 'playlister/playlists.html', {'playlists': playlists})
-    else:
-        error_message = f"Failed to fetch playlists: {response.status_code} {response.text}"
+        response = requests.get('https://api.spotify.com/v1/me/playlists', headers=headers)
+        
+        if response.status_code == 401:  # Unauthorized, token might be expired
+            # Force refresh the token
+            access_token = SpotifyTokenManager.refresh_token(request)
+            headers['Authorization'] = f'Bearer {access_token}'
+            # Retry the request
+            response = requests.get('https://api.spotify.com/v1/me/playlists', headers=headers)
+
+        if response.status_code == 200:
+            playlists = response.json()['items']
+            return render(request, 'playlister/playlists.html', {'playlists': playlists})
+        else:
+            error_message = f"Failed to fetch playlists: {response.status_code} {response.text}"
+            return render(request, 'playlister/playlists.html', {'error': error_message})
+    except Exception as e:
+        error_message = f"An error occurred: {str(e)}"
         return render(request, 'playlister/playlists.html', {'error': error_message})
