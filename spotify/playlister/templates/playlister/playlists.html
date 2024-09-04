@@ -1,28 +1,103 @@
-{% load static %}
-
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Spotify Playlists</title>
-    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Playlists</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222831;
+            color: #EEEEEE;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .playlist-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .playlist-item {
+            background-color: #31363F;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .playlist-image {
+            width: 80px;
+            height: 80px;
+            background-color: #EEEEEE;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            margin-right: 15px;
+            overflow: hidden;
+        }
+        .playlist-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .playlist-info {
+            flex-grow: 1;
+        }
+        .playlist-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .generate-button {
+            background-color: #76ABAE;
+            color: #EEEEEE;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        .generate-button:hover {
+            background-color: #5f8a8d;
+        }
+        .error-message {
+            color: #ff6b6b;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h1>My Spotify Playlists</h1>
-    {% if error %}
-        <p>{{ error }}</p>
-    {% else %}
-        <ul>
-        {% for playlist in playlists %}
-            <li>
-                <img src="{{ playlist.images.0.url }}" alt="{{ playlist.name }}" width="60" height="60">
-                <a href="{{ playlist.external_urls.spotify }}">{{ playlist.name }}</a>
-                ({{ playlist.tracks.total }} tracks)
-                <a href="{% url 'generate_image' playlist_id=playlist.id %}">Generate Cover</a>
-            </li>
-        {% endfor %}
-        </ul>
-    {% endif %}
+    <h1>Your Playlists 🎵🎵</h1>
+    <div class="playlist-container">
+        {% if error %}
+            <p class="error-message">{{ error }}</p>
+        {% else %}
+            {% for playlist in playlists %}
+            <div class="playlist-item">
+                <div class="playlist-image">
+                    {% if playlist.images %}
+                        <img src="{{ playlist.images.0.url }}" alt="{{ playlist.name }}">
+                    {% else %}
+                        <span>No Image</span>
+                    {% endif %}
+                </div>
+                <div class="playlist-info">
+                    <div class="playlist-name">{{ playlist.name }}</div>
+                    <div>{{ playlist.tracks.total }} tracks</div>
+                </div>
+                <a href="{% url 'generate_image' playlist_id=playlist.id %}" class="generate-button">Generate Cover 🖼️</a>
+            </div>
+            {% empty %}
+            <p>No playlists found.</p>
+            {% endfor %}
+        {% endif %}
+    </div>
 </body>
 </html>
