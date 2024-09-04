@@ -14,16 +14,23 @@
         }
         .header {
             background-color: #31363F;
-            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
         }
         .back-button {
             color: #EEEEEE;
             text-decoration: none;
             display: flex;
             align-items: center;
+            position: absolute;
+            left: 20px;
+        }
+        h1 {
+            flex-grow: 1;
+            text-align: center;
+            margin: 0;
         }
         .main-content {
             padding: 20px;
@@ -58,12 +65,15 @@
             display: flex;
             flex-direction: column;
         }
-        .playlist-id {
+        .playlist-name {
+            font-size: 24px;
             background-color: #76ABAE;
             color: #222831;
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
         }
         .cover-description {
             background-color: #31363F;
@@ -89,7 +99,7 @@
                 {% endif %}
             </div>
             <div class="cover-info">
-                <div class="playlist-id">Playlist ID #{{ playlist_id }}</div>
+                <div class="playlist-name">{{ playlist_name }}</div>
                 <div class="cover-description">
                     <h3>Cover Description:</h3>
                     <p>{{ prompt }}</p>

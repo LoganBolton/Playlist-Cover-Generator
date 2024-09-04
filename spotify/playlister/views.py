@@ -23,12 +23,51 @@ def index(request):
     todo_list = TodoItem.objects.order_by('id')
     return render(request, 'playlister/index.html', {'todo_list': todo_list})
 
+# def generate_image(request, playlist_id, playlist_name):
+#     # prompt = driver(playlist_id)  # Call the driver function to get the image URL
+#     prompt = "testing debug prompt mmmm I love prompting language models with dynamic data mmmm " + playlist_id 
+#     image_url = ""
+#     # return render(request, 'playlister/display_image.html', {'image_url': image_url})
+#     return render(request, 'playlister/display_image.html', {'playlist_id': playlist_id, 'prompt': prompt, 'image_url': image_url, "playlist_name": playlist_name})
+
 def generate_image(request, playlist_id):
-    # prompt = driver(playlist_id)  # Call the driver function to get the image URL
-    prompt = "testing debug prompt mmmm I love prompting language models with dynamic data mmmm " + playlist_id 
-    image_url = ""
-    # return render(request, 'playlister/display_image.html', {'image_url': image_url})
-    return render(request, 'playlister/display_image.html', {'playlist_id': playlist_id, 'prompt': prompt, 'image_url': image_url})
+    try:
+        # Get a fresh token
+        access_token = SpotifyTokenManager.get_token(request)
+
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+        }
+
+        # Fetch the specific playlist
+        response = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers)
+        
+        if response.status_code == 401:  # Unauthorized, token might be expired
+            # Force refresh the token
+            access_token = SpotifyTokenManager.refresh_token(request)
+            headers['Authorization'] = f'Bearer {access_token}'
+            # Retry the request
+            response = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers)
+
+        if response.status_code == 200:
+            playlist = response.json()
+            playlist_name = playlist['name']
+            
+            prompt = f"testing debug prompt for playlist: {playlist_name} (ID: {playlist_id})"
+            image_url = ""
+            
+            return render(request, 'playlister/display_image.html', {
+                'playlist_id': playlist_id,
+                'playlist_name': playlist_name,
+                'prompt': prompt,
+                'image_url': image_url
+            })
+        else:
+            error_message = f"Failed to fetch playlist: {response.status_code} {response.text}"
+            return render(request, 'playlister/error.html', {'error': error_message})
+    except Exception as e:
+        error_message = f"An error occurred: {str(e)}"
+        return render(request, 'playlister/error.html', {'error': error_message})
 
 def spotify_auth(request):
     client_id = settings.SPOTIFY_CLIENT_ID
