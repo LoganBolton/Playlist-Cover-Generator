@@ -10,7 +10,7 @@
             background-color: #222831;
             color: #EEEEEE;
             margin: 0;
-            padding: 20px;
+            {% comment %} padding: 20px; {% endcomment %}
         }
         h1 {
             text-align: center;
@@ -71,10 +71,20 @@
             text-align: center;
             font-weight: bold;
         }
+
+        .header {
+            background-color: #31363F;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+        }
     </style>
 </head>
-<body>
+<div class="header">
     <h1>Your Playlists 🎵🎵</h1>
+</div>
+<body>
     <div class="playlist-container">
         {% if error %}
             <p class="error-message">{{ error }}</p>
