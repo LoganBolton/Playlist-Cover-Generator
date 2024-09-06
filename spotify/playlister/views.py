@@ -53,7 +53,10 @@ def generate_image(request, playlist_id):
             playlist = response.json()
             playlist_name = playlist['name']
             
-            prompt = f"testing debug prompt for playlist: {playlist_name} (ID: {playlist_id})"
+            # prompt = f"testing debug prompt for playlist: {playlist_name} (ID: {playlist_id})"
+            # prompt = driver(playlist_id)  # Call the driver function to get the image URL
+            prompt = "cool awesome image that's really cool and abstract and minimalist and stuff"
+            # image_url = driver(playlist_id)
             image_url = ""
             
             return render(request, 'playlister/display_image.html', {
@@ -68,6 +71,9 @@ def generate_image(request, playlist_id):
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
         return render(request, 'playlister/error.html', {'error': error_message})
+
+
+## SPOTIFY --------------------------------------------
 
 def spotify_auth(request):
     client_id = settings.SPOTIFY_CLIENT_ID

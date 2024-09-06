@@ -7,7 +7,7 @@ from anthropic import Anthropic
 from PIL import Image
 import replicate
 import requests
-from statistics import mean  # Add this import at the beginning of your file
+from statistics import mean 
 
 # Claude
 def set_up_claude():
@@ -233,24 +233,25 @@ def driver(PLAYLIST_ID):
     playlist_description = get_playlist_details(PLAYLIST_ID)
     prompt = f"""Give me a prompt that will be able represent this playlist in a latent diffusion model. Make it minimalist and abstract but still keep it interesting. I don't want hotel art level minimalism, I want something raw and artistic. If relevant, incorporate imagery that relates to the specific songs or artists. Put your description in square brackets like this [description].\n\n{playlist_description}"""
     
-    convo = get_conversation(prompt)
-    response = send_message(convo)
-    description = extract_description(response)
-    return description
+    # convo = get_conversation(prompt)
+    # response = send_message(convo)
+    # description = extract_description(response)
+    # return description
 
     #temporarily commented out 
     # print(description)
-    # output = replicate.run(
-    #     "black-forest-labs/flux-schnell",
-    #     input={
-    #         "prompt": description,
-    #         "num_outputs": 1,
-    #         "aspect_ratio": "1:1",
-    #         "output_format": "webp",
-    #         "output_quality": 80
-    #     }
-    # )
-    # print(output)
-    # image_url = output[0]
+    description = "really cool awesome image that's really cool and abstract and minimalist and stuff"
+    output = replicate.run(
+        "black-forest-labs/flux-schnell",
+        input={
+            "prompt": description,
+            "num_outputs": 1,
+            "aspect_ratio": "1:1",
+            "output_format": "webp",
+            "output_quality": 80
+        }
+    )
+    print(output)
+    image_url = output[0]
 
-    # return image_url
+    return image_url
