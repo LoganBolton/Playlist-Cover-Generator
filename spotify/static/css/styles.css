@@ -1,0 +1,10 @@
+@font-face {
+    font-family: 'YourCustomFont';
+    src: url('/static/fonts/circular-std-2.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  p {
+    font-family: 'YourCustomFont', sans-serif;
+  }
