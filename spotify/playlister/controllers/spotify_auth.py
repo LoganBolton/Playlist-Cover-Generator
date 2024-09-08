@@ -73,8 +73,8 @@ class SpotifyTokenManager:
 
 def spotify_auth(request):
     client_id = settings.SPOTIFY_CLIENT_ID
-    redirect_uri = 'http://127.0.0.1:8081/callback'  
-    # redirect_uri = 'http://18.117.227.7:8000/callback'  
+    # redirect_uri = 'http://127.0.0.1:8081/callback'  
+    redirect_uri = 'http://18.117.227.7:8000/callback'  
     # redirect_uri = 'http://3.145.113.169:8000/callback'  
     scope = 'playlist-read-private playlist-read-collaborative'
 
@@ -98,8 +98,8 @@ def spotify_callback(request):
 
     client_id = settings.SPOTIFY_CLIENT_ID
     client_secret = settings.SPOTIFY_CLIENT_SECRET
-    redirect_uri = 'http://127.0.0.1:8081/callback'  
-    # redirect_uri = 'http://18.117.227.7:8000/callback'  
+    # redirect_uri = 'http://127.0.0.1:8081/callback'  
+    redirect_uri = 'http://18.117.227.7:8000/callback'  
     # redirect_uri = 'http://3.145.113.169:8000/callback'  
 
     print(f"Callback Redirect URI: {redirect_uri}")  # For debugging
