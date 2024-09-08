@@ -10,11 +10,9 @@ import requests
 from statistics import mean 
 
 from django.shortcuts import render, redirect
-from .models import TodoItem
 from django.views.decorators.http import require_POST
 from django.conf import settings
 import requests
-from django.conf import settings
 import requests
 import base64
 from django.core.cache import cache
@@ -28,223 +26,184 @@ import base64
 import urllib.parse
 
 from .controllers import claude
+from .controllers import spotify_auth
 
-class SpotifyTokenManager:
-    @staticmethod
-    def get_token(request):
-        # Try to get the token from cache
-        access_token = cache.get('spotify_access_token')
-        if access_token:
-            return access_token
+# class SpotifyTokenManager:
+#     @staticmethod
+#     def get_token(request):
+#         # Try to get the token from cache
+#         access_token = cache.get('spotify_access_token')
+#         if access_token:
+#             return access_token
         
-        # If not in cache, refresh the token
-        return SpotifyTokenManager.refresh_token(request)
+#         # If not in cache, refresh the token
+#         return SpotifyTokenManager.refresh_token(request)
 
-    @staticmethod
-    def refresh_token(request):
-        token_url = "https://accounts.spotify.com/api/token"
-        refresh_token = request.session.get('spotify_refresh_token')
-        client_id = settings.SPOTIFY_CLIENT_ID
-        client_secret = settings.SPOTIFY_CLIENT_SECRET
+#     @staticmethod
+#     def refresh_token(request):
+#         token_url = "https://accounts.spotify.com/api/token"
+#         refresh_token = request.session.get('spotify_refresh_token')
+#         client_id = settings.SPOTIFY_CLIENT_ID
+#         client_secret = settings.SPOTIFY_CLIENT_SECRET
 
-        if not refresh_token:
-            raise Exception("No refresh token available")
+#         if not refresh_token:
+#             raise Exception("No refresh token available")
 
-        client_creds = f"{client_id}:{client_secret}"
-        client_creds_b64 = base64.b64encode(client_creds.encode()).decode()
+#         client_creds = f"{client_id}:{client_secret}"
+#         client_creds_b64 = base64.b64encode(client_creds.encode()).decode()
 
-        headers = {
-            "Authorization": f"Basic {client_creds_b64}"
-        }
+#         headers = {
+#             "Authorization": f"Basic {client_creds_b64}"
+#         }
 
-        data = {
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token
-        }
+#         data = {
+#             "grant_type": "refresh_token",
+#             "refresh_token": refresh_token
+#         }
 
-        response = requests.post(token_url, headers=headers, data=data)
+#         response = requests.post(token_url, headers=headers, data=data)
         
-        if response.status_code == 200:
-            token_info = response.json()
-            access_token = token_info['access_token']
-            expires_in = token_info['expires_in']
+#         if response.status_code == 200:
+#             token_info = response.json()
+#             access_token = token_info['access_token']
+#             expires_in = token_info['expires_in']
 
-            # Cache the new token
-            cache.set('spotify_access_token', access_token, expires_in - 300)  # Cache for token lifetime minus 5 minutes
+#             # Cache the new token
+#             cache.set('spotify_access_token', access_token, expires_in - 300)  # Cache for token lifetime minus 5 minutes
 
-            # Update the session with the new access token
-            request.session['spotify_access_token'] = access_token
+#             # Update the session with the new access token
+#             request.session['spotify_access_token'] = access_token
 
-            # If a new refresh token is provided, update it in the session
-            if 'refresh_token' in token_info:
-                request.session['spotify_refresh_token'] = token_info['refresh_token']
+#             # If a new refresh token is provided, update it in the session
+#             if 'refresh_token' in token_info:
+#                 request.session['spotify_refresh_token'] = token_info['refresh_token']
 
-            return access_token
-        else:
-            raise Exception("Failed to refresh access token")
+#             return access_token
+#         else:
+#             raise Exception("Failed to refresh access token")
 
-def spotify_auth(request):
-    client_id = settings.SPOTIFY_CLIENT_ID
-    redirect_uri = 'http://127.0.0.1:8081/callback'  # Updated to match your server
-    scope = 'playlist-read-private playlist-read-collaborative'
+# def spotify_auth(request):
+#     client_id = settings.SPOTIFY_CLIENT_ID
+#     redirect_uri = 'http://127.0.0.1:8081/callback'  # Updated to match your server
+#     scope = 'playlist-read-private playlist-read-collaborative'
 
-    print(f"Redirect URI: {redirect_uri}")  # For debugging
+#     print(f"Redirect URI: {redirect_uri}")  # For debugging
 
-    auth_url = 'https://accounts.spotify.com/authorize?' + urllib.parse.urlencode({
-        'response_type': 'code',
-        'client_id': client_id,
-        'scope': scope,
-        'redirect_uri': redirect_uri,
-    })
+#     auth_url = 'https://accounts.spotify.com/authorize?' + urllib.parse.urlencode({
+#         'response_type': 'code',
+#         'client_id': client_id,
+#         'scope': scope,
+#         'redirect_uri': redirect_uri,
+#     })
 
-    return redirect(auth_url)
+#     return redirect(auth_url)
 
-def spotify_callback(request):
-    code = request.GET.get('code')
+# def spotify_callback(request):
+#     code = request.GET.get('code')
     
-    if not code:
-        return HttpResponse("Authorization failed: No code received")
+#     if not code:
+#         return HttpResponse("Authorization failed: No code received")
 
-    client_id = settings.SPOTIFY_CLIENT_ID
-    client_secret = settings.SPOTIFY_CLIENT_SECRET
-    redirect_uri = 'http://127.0.0.1:8081/callback'  # Updated to match your server
+#     client_id = settings.SPOTIFY_CLIENT_ID
+#     client_secret = settings.SPOTIFY_CLIENT_SECRET
+#     redirect_uri = 'http://127.0.0.1:8081/callback'  # Updated to match your server
 
-    print(f"Callback Redirect URI: {redirect_uri}")  # For debugging
+#     print(f"Callback Redirect URI: {redirect_uri}")  # For debugging
 
-    token_url = 'https://accounts.spotify.com/api/token'
-    authorization = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+#     token_url = 'https://accounts.spotify.com/api/token'
+#     authorization = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
 
-    headers = {
-        'Authorization': f'Basic {authorization}',
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }
+#     headers = {
+#         'Authorization': f'Basic {authorization}',
+#         'Content-Type': 'application/x-www-form-urlencoded'
+#     }
 
-    data = {
-        'grant_type': 'authorization_code',
-        'code': code,
-        'redirect_uri': redirect_uri
-    }
+#     data = {
+#         'grant_type': 'authorization_code',
+#         'code': code,
+#         'redirect_uri': redirect_uri
+#     }
 
-    response = requests.post(token_url, headers=headers, data=data)
-    token_info = response.json()
+#     response = requests.post(token_url, headers=headers, data=data)
+#     token_info = response.json()
 
-    print(f"Token Info: {token_info}")  # For debugging
+#     print(f"Token Info: {token_info}")  # For debugging
 
-    if 'error' in token_info:
-        return HttpResponse(f"Error: {token_info['error']}")
+#     if 'error' in token_info:
+#         return HttpResponse(f"Error: {token_info['error']}")
 
-    access_token = token_info.get('access_token')
-    refresh_token = token_info.get('refresh_token')
+#     access_token = token_info.get('access_token')
+#     refresh_token = token_info.get('refresh_token')
 
-    if not access_token or not refresh_token:
-        return HttpResponse("Failed to obtain tokens")
+#     if not access_token or not refresh_token:
+#         return HttpResponse("Failed to obtain tokens")
 
-    request.session['spotify_access_token'] = access_token
-    request.session['spotify_refresh_token'] = refresh_token
+#     request.session['spotify_access_token'] = access_token
+#     request.session['spotify_refresh_token'] = refresh_token
 
-    print(f"Session after storing tokens: {dict(request.session)}")  # For debugging
+#     print(f"Session after storing tokens: {dict(request.session)}")  # For debugging
 
-    return HttpResponse("Authorization successful! Tokens have been saved.")
+#     return HttpResponse("Authorization successful! Tokens have been saved.")
 
-# Claude
-# def set_up_claude():
-#     api_key = os.environ.get("ANTHROPIC_API_KEY_PERSONAL")
-#     if not api_key:
-#         print("Error: ANTHROPIC_API_KEY environment variable is not set.")
+# # Spotify
+# def set_up_spotify():
+    
+#     # Replace these with your actual Client ID and Client Secret
+#     CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
+#     CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
+
+#     client_creds = f"{CLIENT_ID}:{CLIENT_SECRET}"
+#     client_creds_b64 = base64.b64encode(client_creds.encode())
+
+#     # Token URL
+#     token_url = 'https://accounts.spotify.com/api/token'
+
+#     # Request Body Parameters
+#     token_data = {
+#         'grant_type': 'client_credentials'
+#     }
+
+#     # Request Headers
+#     token_headers = {
+#         'Authorization': f'Basic {client_creds_b64.decode()}'
+#     }
+    
+# # Authentication
+# def get_token():
+#     CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
+#     CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
+
+#     if not CLIENT_ID or not CLIENT_SECRET:
+#         print("Error: SPOTIFY_CLIENT_ID and/or SPOTIFY_CLIENT_SECRET environment variables are not set.")
 #         exit(1)
 
-#     # Set up the client
-#     client = anthropic.Anthropic(api_key=api_key)
-    
-# def get_conversation(prompt):
-#     message = [{
-#                     "role": "user",
-#                     "content": [
-#                         {
-#                             "type": "text",
-#                             "text": prompt,
-#                         }
-#                     ]
-#                 }]
-#     return message
+#     auth_string = f"{CLIENT_ID}:{CLIENT_SECRET}"
+#     auth_bytes = auth_string.encode("utf-8")
+#     auth_base64 = str(base64.b64encode(auth_bytes), "utf-8")
 
-# def send_message(conversation):
-#     message = anthropic.Anthropic().messages.create(
-#         model="claude-3-5-sonnet-20240620",
-#         max_tokens=1024,
-#         messages=conversation
-#     )
-#     # print(f"response to followup: {message.content}")
-#     pure_text = message.content[0].text
-#     # print(f"pure text: {pure_text}")
-#     return pure_text
+#     url = "https://accounts.spotify.com/api/token"
+#     headers = {
+#         "Authorization": "Basic " + auth_base64,
+#         "Content-Type": "application/x-www-form-urlencoded"
+#     }
+#     data = {"grant_type": "client_credentials"}
+#     result = requests.post(url, headers=headers, data=data)
+#     json_result = result.json()
+#     token = json_result.get("access_token")
 
-# def extract_description(text):
-#     start = text.index('[') + 1
-#     end = text.index(']')
-#     result = text[start:end]
-#     return result
+#     if not token:
+#         print("Error: Could not retrieve Spotify token.")
+#         exit(1)
 
-# Spotify
-def set_up_spotify():
-    
-    # Replace these with your actual Client ID and Client Secret
-    CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
-    CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
+#     return token
 
-    client_creds = f"{CLIENT_ID}:{CLIENT_SECRET}"
-    client_creds_b64 = base64.b64encode(client_creds.encode())
+# def get_auth_header(token):
+#     return {"Authorization": "Bearer " + token}
 
-    # Token URL
-    token_url = 'https://accounts.spotify.com/api/token'
-
-    # Request Body Parameters
-    token_data = {
-        'grant_type': 'client_credentials'
-    }
-
-    # Request Headers
-    token_headers = {
-        'Authorization': f'Basic {client_creds_b64.decode()}'
-    }
-    
-# Authentication
-def get_token():
-    CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
-    CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
-
-    if not CLIENT_ID or not CLIENT_SECRET:
-        print("Error: SPOTIFY_CLIENT_ID and/or SPOTIFY_CLIENT_SECRET environment variables are not set.")
-        exit(1)
-
-    auth_string = f"{CLIENT_ID}:{CLIENT_SECRET}"
-    auth_bytes = auth_string.encode("utf-8")
-    auth_base64 = str(base64.b64encode(auth_bytes), "utf-8")
-
-    url = "https://accounts.spotify.com/api/token"
-    headers = {
-        "Authorization": "Basic " + auth_base64,
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    data = {"grant_type": "client_credentials"}
-    result = requests.post(url, headers=headers, data=data)
-    json_result = result.json()
-    token = json_result.get("access_token")
-
-    if not token:
-        print("Error: Could not retrieve Spotify token.")
-        exit(1)
-
-    return token
-
-
-def get_auth_header(token):
-    return {"Authorization": "Bearer " + token}
-
-# Get playlist tracks
+# # Get playlist tracks
 def get_playlist_tracks(token, playlist_id):
     url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
-    headers = get_auth_header(token)
+    headers = spotify_auth.get_auth_header(token)
     
     tracks = []
     while url:
@@ -266,7 +225,7 @@ def get_playlist_tracks(token, playlist_id):
 # Get audio features for tracks
 def get_audio_features(token, track_ids):
     url = f"https://api.spotify.com/v1/audio-features"
-    headers = get_auth_header(token)
+    headers = spotify_auth.get_auth_header(token)
     params = {'ids': ','.join(track_ids)}
     
     result = requests.get(url, headers=headers, params=params)
@@ -301,7 +260,7 @@ def analyze_vibe(features):
     return ", ".join(vibe) if vibe else "neutral"
 
 def get_playlist_details(PLAYLIST_ID):
-    token = get_token()
+    token = spotify_auth.get_token()
     tracks = get_playlist_tracks(token, PLAYLIST_ID)
 
     # Get audio features for all tracks
@@ -353,7 +312,7 @@ def get_playlist_details(PLAYLIST_ID):
 
 def driver(PLAYLIST_ID):
     claude.set_up_claude()
-    set_up_spotify()
+    spotify_auth.set_up_spotify()
     
     # bossa = '6cGZkPs8wimEZBDzpVNaut'
     # jazz = '71vvwEbxgXqHZ7ONA6WGxt'
@@ -392,14 +351,14 @@ def prelim_spotify(request, playlist_id):
     
     if response.status_code == 401:  # Unauthorized, token might be expired
         # Force refresh the token
-        access_token = SpotifyTokenManager.refresh_token(request)
+        access_token = spotify_auth.SpotifyTokenManager.refresh_token(request)
         headers['Authorization'] = f'Bearer {access_token}'
         # Retry the request
         response = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers)
     return response 
 
 def get_headers(request):
-    access_token = SpotifyTokenManager.get_token(request)
+    access_token = spotify_auth.SpotifyTokenManager.get_token(request)
 
     headers = {
         'Authorization': f'Bearer {access_token}',
