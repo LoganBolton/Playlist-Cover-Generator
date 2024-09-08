@@ -79,18 +79,65 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
           }
+        
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
 
+            width: 100%;
+            min-height: 250px;
+            background-color: #31363F;
+            border-radius: 10px;
+            padding: 0 30px 30px 30px;
+            max-width: 400px;
+            margin: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .login-container p {
+            color: #EEEEEE;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .login-button {
+            max-width: 30%;
+            background-color: #6a9c9e;
+            color: #EEEEEE;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .login-button:hover {
+            background-color: #5f8a8d;
+        }
+
+        .login-area {
+            display: flex;
+            justify-content: center;
+        }
     </style>
 </head>
 <div class="header">
     <h1>Your Playlists<span class='title-emoji'> 🎵🎵<span></h1>
-    <a class='logout-button' href="{% url 'spotify_logout' %}">Logout</a>
+    {% if not not_authenticated%}
+        <a class='logout-button' href="{% url 'spotify_logout' %}">Logout</a>
+    {% endif %}
 </div>
 <body>
     {% if not_authenticated %}
-        <div class="login-container">
-            <p>Please log in with Spotify to view your playlists.</p>
-            <a href="{% url 'spotify_auth' %}" class="login-button">Login with Spotify</a>
+        <div class='login-area'> 
+            <div class="login-container">
+                <p class='SpotifyFont'>Please log in to view your playlists:</p>
+                <a href="{% url 'spotify_auth' %}" class="login-button">Login with Spotify</a>
+            </div>
         </div>
     {% elif error %}
         <p class="error-message">{{ error }}</p>

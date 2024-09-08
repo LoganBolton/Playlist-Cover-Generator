@@ -83,6 +83,7 @@ def spotify_auth(request):
         'client_id': client_id,
         'scope': scope,
         'redirect_uri': redirect_uri,
+        'show_dialog': 'true' 
     })
 
     return redirect(auth_url)
@@ -215,15 +216,23 @@ def get_headers(request):
 
 def spotify_logout(request):
     # Clear Spotify-related session data
-    keys_to_remove = ['spotify_access_token', 'spotify_refresh_token']
+    keys_to_remove = ['spotify_access_token', 'spotify_refresh_token', 'last_spotify_auth_time']
     for key in keys_to_remove:
         request.session.pop(key, None)
+    return redirect('playlists')  # Redirect to the playlists page, which will now show the login prompt
+
+
+# def spotify_logout(request):
+#     # Clear Spotify-related session data
+#     keys_to_remove = ['spotify_access_token', 'spotify_refresh_token']
+#     for key in keys_to_remove:
+#         request.session.pop(key, None)
     
-    # Clear Django's session
-    request.session.flush()
+#     # Clear Django's session
+#     request.session.flush()
     
-    # Logout the user if they're logged in with Django's auth system
-    auth_logout(request)
+#     # Logout the user if they're logged in with Django's auth system
+#     auth_logout(request)
     
-    messages.success(request, "You've been logged out from Spotify.")
-    return redirect('playlists')  # Redirect to your home page or login page
+#     messages.success(request, "You've been logged out from Spotify.")
+#     return redirect('playlists')  # Redirect to your home page or login page
