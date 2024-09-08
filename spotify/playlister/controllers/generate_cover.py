@@ -38,12 +38,13 @@ def get_playlist_tracks(token, playlist_id):
         json_result = result.json()
         
         for item in json_result['items']:
-            track = item['track']
-            tracks.append({
-                'id': track['id'],
-                'name': track['name'],
-                'artist': track['artists'][0]['name']
-            })
+            track = item.get('track')
+            if track:
+                tracks.append({
+                    'id': track.get('id', 'Unknown'),
+                    'name': track.get('name', 'Unknown'),
+                    'artist': track['artists'][0]['name'] if track.get('artists') else 'Unknown'
+                })
         
         url = json_result.get('next')  # Get the next page URL, if it exists
 
