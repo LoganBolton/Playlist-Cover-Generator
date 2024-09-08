@@ -13,7 +13,6 @@ from django.shortcuts import render, redirect
 from .models import TodoItem
 from django.views.decorators.http import require_POST
 from django.conf import settings
-# from .utils import driver
 import requests
 from django.conf import settings
 import requests
@@ -27,6 +26,8 @@ from django.urls import reverse
 import requests
 import base64
 import urllib.parse
+
+from .controllers import claude
 
 class SpotifyTokenManager:
     @staticmethod
@@ -146,43 +147,43 @@ def spotify_callback(request):
     return HttpResponse("Authorization successful! Tokens have been saved.")
 
 # Claude
-def set_up_claude():
-    api_key = os.environ.get("ANTHROPIC_API_KEY_PERSONAL")
-    if not api_key:
-        print("Error: ANTHROPIC_API_KEY environment variable is not set.")
-        exit(1)
+# def set_up_claude():
+#     api_key = os.environ.get("ANTHROPIC_API_KEY_PERSONAL")
+#     if not api_key:
+#         print("Error: ANTHROPIC_API_KEY environment variable is not set.")
+#         exit(1)
 
-    # Set up the client
-    client = anthropic.Anthropic(api_key=api_key)
+#     # Set up the client
+#     client = anthropic.Anthropic(api_key=api_key)
     
-def get_conversation(prompt):
-    message = [{
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": prompt,
-                        }
-                    ]
-                }]
-    return message
+# def get_conversation(prompt):
+#     message = [{
+#                     "role": "user",
+#                     "content": [
+#                         {
+#                             "type": "text",
+#                             "text": prompt,
+#                         }
+#                     ]
+#                 }]
+#     return message
 
-def send_message(conversation):
-    message = anthropic.Anthropic().messages.create(
-        model="claude-3-5-sonnet-20240620",
-        max_tokens=1024,
-        messages=conversation
-    )
-    # print(f"response to followup: {message.content}")
-    pure_text = message.content[0].text
-    # print(f"pure text: {pure_text}")
-    return pure_text
+# def send_message(conversation):
+#     message = anthropic.Anthropic().messages.create(
+#         model="claude-3-5-sonnet-20240620",
+#         max_tokens=1024,
+#         messages=conversation
+#     )
+#     # print(f"response to followup: {message.content}")
+#     pure_text = message.content[0].text
+#     # print(f"pure text: {pure_text}")
+#     return pure_text
 
-def extract_description(text):
-    start = text.index('[') + 1
-    end = text.index(']')
-    result = text[start:end]
-    return result
+# def extract_description(text):
+#     start = text.index('[') + 1
+#     end = text.index(']')
+#     result = text[start:end]
+#     return result
 
 # Spotify
 def set_up_spotify():
@@ -351,7 +352,7 @@ def get_playlist_details(PLAYLIST_ID):
     return playlist_description
 
 def driver(PLAYLIST_ID):
-    set_up_claude()
+    claude.set_up_claude()
     set_up_spotify()
     
     # bossa = '6cGZkPs8wimEZBDzpVNaut'
@@ -360,9 +361,9 @@ def driver(PLAYLIST_ID):
     playlist_description = get_playlist_details(PLAYLIST_ID)
     prompt = f"""Give me a prompt that will be able represent this playlist in a latent diffusion model. Make it minimalist and abstract but still keep it interesting. I don't want hotel art level minimalism, I want something raw and artistic. If relevant, incorporate imagery that relates to the specific songs or artists. For example, if one of the tracks was named "The Girl from Ipanema", then it would be relevant to add the Ipanema beach to the prompt. Put your description in square brackets like this [description].\n\n{playlist_description}"""
     
-    convo = get_conversation(prompt)
-    response = send_message(convo)
-    description = extract_description(response)
+    convo = claude.get_conversation(prompt)
+    response = claude.send_message(convo)
+    description = claude.extract_description(response)
     # return description, ""
 
     #temporarily commented out 
