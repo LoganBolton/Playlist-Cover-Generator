@@ -5,9 +5,9 @@ import anthropic
 
 # Claude
 def set_up_claude():
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("ANTHROPIC_API_KEY_PERSONAL")
     if not api_key:
-        print("Error: ANTHROPIC_API_KEY_PERSONAL environment variable is not set.")
+        print("Error: ANTHROPIC_API_KEY environment variable is not set.")
         exit(1)
 
     # Set up the client

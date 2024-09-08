@@ -1,0 +1,173 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Playlists</title>
+    <style>
+        .playlist-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .playlist-item {
+            background-color: #31363F;
+            border-radius: 10px;
+            padding: 10px 10px 10px 10px;
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+        }
+        .playlist-image {
+            width: 115px;
+            height: 115px;
+            min-width: 115px;
+            min-height: 115px;
+            background-color: #EEEEEE;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .playlist-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .playlist-info {
+            flex-grow: 1;
+            margin-left: 15px;
+            margin-right: 15px;
+            max-height: 115px;
+            overflow: hidden;
+        }
+        .playlist-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .generate-button {
+            background-color: #6a9c9e;
+            color: #EEEEEE;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            width: min-content;
+        }
+        .generate-button:hover {
+            background-color: #5f8a8d;
+        }
+        .error-message {
+            color: #ff6b6b;
+            text-align: center;
+            font-weight: bold;
+        }
+
+
+
+        .playlist-text {
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+          }
+        
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            width: 100%;
+            min-height: 250px;
+            background-color: #31363F;
+            border-radius: 10px;
+            padding: 0 30px 30px 30px;
+            max-width: 400px;
+            margin: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .login-container p {
+            color: #EEEEEE;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .login-button {
+            max-width: 30%;
+            background-color: #6a9c9e;
+            color: #EEEEEE;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .login-button:hover {
+            background-color: #5f8a8d;
+        }
+
+        .login-area {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<div class="header">
+    <h1>Your Playlists<span class='title-emoji'> 🎵🎵<span></h1>
+    {% if not not_authenticated%}
+        <a class='logout-button' href="{% url 'spotify_logout' %}">Logout</a>
+    {% endif %}
+</div>
+<body>
+    {% if not_authenticated %}
+        <div class='login-area'> 
+            <div class="login-container">
+                <p class='SpotifyFont'>Please log in to view your playlists:</p>
+                <a href="{% url 'spotify_auth' %}" class="login-button">Login with Spotify</a>
+            </div>
+        </div>
+    {% elif error %}
+        <p class="error-message">{{ error }}</p>
+    {% else %}
+        <div class="playlist-container">
+            {% for playlist in playlists %}
+                <div class="playlist-item">
+                    <div class="playlist-image">
+                        {% if playlist.images %}
+                            <img src="{{ playlist.images.0.url }}" alt="{{ playlist.name }}">
+                        {% else %}
+                            <span>No Image</span>
+                        {% endif %}
+                    </div>
+                    <div class="playlist-info">
+                        <div class="playlist-name">
+                            <p class="playlist-text">{{ playlist.name }}</p>
+                        </div>
+                        <div>{{ playlist.tracks.total }} tracks</div>
+                    </div>
+                    <a href="{% url 'generate_image' playlist_id=playlist.id %}" class="generate-button">
+                        <div>
+                            <p class='generate-text'>Generate Cover 🖼️</p>
+                        </div>
+                    </a>
+                </div>
+            {% empty %}
+                <p>No playlists found.</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</body>
+</html>

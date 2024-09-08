@@ -56,6 +56,10 @@ def get_audio_features(token, track_ids):
     url = f"https://api.spotify.com/v1/audio-features"
     headers = spotify_auth.get_auth_header(token)
     params = {'ids': ','.join(track_ids)}
+    print()
+    print(headers)
+    print(params)
+    print()
     result = requests.get(url, headers=headers, params=params)
 
     return result.json()['audio_features']
