@@ -7,7 +7,8 @@ from django.http import HttpResponse
 from django.urls import reverse
 import requests
 
-from .utils import driver
+# from .utils import driver
+from .controllers.generate_cover import get_prompt_and_cover
 from .controllers.spotify_auth import SpotifyTokenManager
 from .controllers.spotify_auth import get_headers
 from .controllers.spotify_auth import get_playlist_response
@@ -25,7 +26,7 @@ def generate_image(request, playlist_id):
             playlist_name = playlist['name']
             
             ## DEBUG CODE
-            prompt, image_url = driver(playlist_id)  # Call the driver function to get the image URL
+            prompt, image_url = get_prompt_and_cover(playlist_id)  # Call the driver function to get the image URL
             # prompt = "cool awesome image that's really cool and abstract and minimalist and stuff"
             # image_url = ""
             
