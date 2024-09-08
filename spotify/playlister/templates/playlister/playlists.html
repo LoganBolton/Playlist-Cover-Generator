@@ -57,7 +57,7 @@
             color: #EEEEEE;
             border: none;
             padding: 8px 12px;
-            border-radius: 5px;
+            border-radius: 17px;
             cursor: pointer;
             transition: background-color 0.3s;
             text-decoration: none;
@@ -75,9 +75,14 @@
 
 
         .playlist-text {
-            white-space: normal;
+            max-height: 50px;
+            overflow: hidden;
+            margin-top: 0;
+            margin-bottom: 14px;
+            padding-bottom: 4px;
+            {% comment %} white-space: normal;
             word-wrap: break-word;
-            overflow-wrap: break-word;
+            overflow-wrap: break-word; {% endcomment %}
           }
         
         .login-container {
@@ -106,7 +111,7 @@
             background-color: #6a9c9e;
             color: #EEEEEE;
             border: none;
-            padding: 12px 24px;
+            padding: 12px 14px;
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
@@ -125,17 +130,22 @@
         }
     </style>
 </head>
-<div class="header">
-    <h1>Your Playlists<span class='title-emoji'> 🎵🎵<span></h1>
-    {% if not not_authenticated%}
-        <a class='logout-button' href="{% url 'spotify_logout' %}">Logout</a>
-    {% endif %}
-</div>
+{% if not_authenticated%}
+    <div class="header" style="display:flex;justify-content:center;">
+        <h1>Playlists<span class='title-emoji'> 🎵🎵<span></h1>
+    </div>
+{% else %}
+    <div class="header">
+        <h1>Playlists<span class='title-emoji'> 🎵🎵<span></h1>
+            <a class='logout-button' href="{% url 'spotify_logout' %}">Logout</a>
+    </div>
+{% endif %}
 <body>
     {% if not_authenticated %}
         <div class='login-area'> 
             <div class="login-container">
                 <p class='SpotifyFont'>Please log in to view your playlists:</p>
+                <p style='color: #adadad;margin-top:0px'>Until Spotify approves this website, I have manually add access to anyone who wants to try the site. Please email me at loganbolton101@gmail.com to see your own playlists. Thanks!</p>
                 <a href="{% url 'spotify_auth' %}" class="login-button">Login with Spotify</a>
             </div>
         </div>

@@ -60,8 +60,11 @@ h1 {
 }
 
 @media (max-width: 500px) {
-    .title-emoji {
+    /* .title-emoji {
         display: none;
+    } */
+    .header {
+        justify-content: flex-start;
     }
 }
 
@@ -69,14 +72,17 @@ h1 {
 .generate-text {
     font-weight: bold;
     font-size: 18px;
+    margin: 8px 0px;
 }
 
 .logout-button {
     font-family: 'SpotifyFont', sans-serif;
     font-size: 20px;
-    color: #EEEEEE;
+    color: #808080;
     display: flex;
     align-items: center;
     position: absolute;
     right: 20px;
+    padding-top: 5px;
+    text-decoration: none;
 }

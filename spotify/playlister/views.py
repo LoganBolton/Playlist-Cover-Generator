@@ -61,28 +61,3 @@ def get_playlists(request):
     except Exception as e:
         error_message = f"An error occurred: {str(e)}"
         return render(request, 'playlister/playlists.html', {'error': error_message})
-
-
-# USing Client Auth :(
-# def get_playlists(request):
-#     if 'spotify_access_token' not in request.session:
-#         return render(request, 'playlister/playlists.html', {'not_authenticated': True})
-    
-#     try:
-#         headers = get_headers(request)
-#         response = requests.get('https://api.spotify.com/v1/me/playlists', headers=headers)
-        
-#         if response.status_code == 401:  # Unauthorized, token might be expired
-#             access_token = SpotifyTokenManager.refresh_token(request)
-#             headers['Authorization'] = f'Bearer {access_token}'
-#             response = requests.get('https://api.spotify.com/v1/me/playlists', headers=headers)
-
-#         if response.status_code == 200:
-#             playlists = response.json()['items']
-#             return render(request, 'playlister/playlists.html', {'playlists': playlists})
-#         else:
-#             error_message = f"Failed to fetch playlists: {response.status_code} {response.text}"
-#             return render(request, 'playlister/playlists.html', {'error': error_message})
-#     except Exception as e:
-#         error_message = f"An error occurred: {str(e)}"
-#         return render(request, 'playlister/playlists.html', {'error': error_message})
