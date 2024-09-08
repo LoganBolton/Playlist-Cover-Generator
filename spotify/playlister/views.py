@@ -4,7 +4,8 @@ from django.views.decorators.http import require_POST
 from django.conf import settings
 
 from .utils import driver
-# from .utils import prelim_spotify
+from .utils import prelim_spotify
+from .utils import get_headers
 
 import requests
 from django.conf import settings
@@ -27,22 +28,22 @@ def index(request):
 def generate_image(request, playlist_id):
     try:
         # Get a fresh token
-        access_token = SpotifyTokenManager.get_token(request)
+        # access_token = SpotifyTokenManager.get_token(request)
 
-        headers = {
-            'Authorization': f'Bearer {access_token}',
-        }
+        # headers = {
+        #     'Authorization': f'Bearer {access_token}',
+        # }
 
-        # Fetch the specific playlist
-        response = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers)
+        # # Fetch the specific playlist
+        # response = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers)
         
-        if response.status_code == 401:  # Unauthorized, token might be expired
-            # Force refresh the token
-            access_token = SpotifyTokenManager.refresh_token(request)
-            headers['Authorization'] = f'Bearer {access_token}'
-            # Retry the request
-            response = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers)
-        # response = prelim_spotify(request, playlist_id)
+        # if response.status_code == 401:  # Unauthorized, token might be expired
+        #     # Force refresh the token
+        #     access_token = SpotifyTokenManager.refresh_token(request)
+        #     headers['Authorization'] = f'Bearer {access_token}'
+        #     # Retry the request
+        # #     response = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers)
+        response = prelim_spotify(request, playlist_id)
 
         if response.status_code == 200:
             playlist = response.json()
@@ -188,12 +189,7 @@ class SpotifyTokenManager:
 
 def get_playlists(request):
     try:
-        # Get a fresh token
-        access_token = SpotifyTokenManager.get_token(request)
-
-        headers = {
-            'Authorization': f'Bearer {access_token}',
-        }
+        headers = get_headers(request)
 
         response = requests.get('https://api.spotify.com/v1/me/playlists', headers=headers)
         
