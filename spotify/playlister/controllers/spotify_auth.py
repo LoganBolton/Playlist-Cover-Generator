@@ -73,9 +73,9 @@ class SpotifyTokenManager:
 
 def spotify_auth(request):
     client_id = settings.SPOTIFY_CLIENT_ID
-    # redirect_uri = 'http://127.0.0.1:8081/callback'  
+    redirect_uri = 'http://127.0.0.1:8081/callback'  
     # redirect_uri = 'http://18.117.227.7:8000/callback'  
-    redirect_uri = 'http://3.145.113.169:8000/callback'  
+    # redirect_uri = 'http://3.145.113.169:8000/callback'  
     scope = 'playlist-read-private playlist-read-collaborative'
 
     print(f"Redirect URI: {redirect_uri}")  # For debugging
@@ -98,9 +98,9 @@ def spotify_callback(request):
 
     client_id = settings.SPOTIFY_CLIENT_ID
     client_secret = settings.SPOTIFY_CLIENT_SECRET
-    # redirect_uri = 'http://127.0.0.1:8081/callback'  # Updated to match your server
-    # redirect_uri = 'http://18.117.227.7:8000/callback'  # Updated to match your server
-    redirect_uri = 'http://3.145.113.169:8000/callback'  
+    redirect_uri = 'http://127.0.0.1:8081/callback'  
+    # redirect_uri = 'http://18.117.227.7:8000/callback'  
+    # redirect_uri = 'http://3.145.113.169:8000/callback'  
 
     print(f"Callback Redirect URI: {redirect_uri}")  # For debugging
 
@@ -140,57 +140,60 @@ def spotify_callback(request):
     print("Authorization successful! Tokens have been saved.")
     return redirect('playlists')
 
+# USING CLIENT AUTH AKA BAD 
+# ---------------------------------------------------------------------
 # Spotify
-def set_up_spotify():
+# def set_up_spotify():
     
-    # Replace these with your actual Client ID and Client Secret
-    CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
-    CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
+#     # Replace these with your actual Client ID and Client Secret
+#     CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
+#     CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
 
-    client_creds = f"{CLIENT_ID}:{CLIENT_SECRET}"
-    client_creds_b64 = base64.b64encode(client_creds.encode())
+#     client_creds = f"{CLIENT_ID}:{CLIENT_SECRET}"
+#     client_creds_b64 = base64.b64encode(client_creds.encode())
 
-    # Token URL
-    token_url = 'https://accounts.spotify.com/api/token'
+#     # Token URL
+#     token_url = 'https://accounts.spotify.com/api/token'
 
-    # Request Body Parameters
-    token_data = {
-        'grant_type': 'client_credentials'
-    }
+#     # Request Body Parameters
+#     token_data = {
+#         'grant_type': 'client_credentials'
+#     }
 
-    # Request Headers
-    token_headers = {
-        'Authorization': f'Basic {client_creds_b64.decode()}'
-    }
+#     # Request Headers
+#     token_headers = {
+#         'Authorization': f'Basic {client_creds_b64.decode()}'
+#     }
     
 # Authentication
-def get_token():
-    CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
-    CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
+# def get_token():
+#     CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
+#     CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
 
-    if not CLIENT_ID or not CLIENT_SECRET:
-        print("Error: SPOTIFY_CLIENT_ID and/or SPOTIFY_CLIENT_SECRET environment variables are not set.")
-        exit(1)
+#     if not CLIENT_ID or not CLIENT_SECRET:
+#         print("Error: SPOTIFY_CLIENT_ID and/or SPOTIFY_CLIENT_SECRET environment variables are not set.")
+#         exit(1)
 
-    auth_string = f"{CLIENT_ID}:{CLIENT_SECRET}"
-    auth_bytes = auth_string.encode("utf-8")
-    auth_base64 = str(base64.b64encode(auth_bytes), "utf-8")
+#     auth_string = f"{CLIENT_ID}:{CLIENT_SECRET}"
+#     auth_bytes = auth_string.encode("utf-8")
+#     auth_base64 = str(base64.b64encode(auth_bytes), "utf-8")
 
-    url = "https://accounts.spotify.com/api/token"
-    headers = {
-        "Authorization": "Basic " + auth_base64,
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    data = {"grant_type": "client_credentials"}
-    result = requests.post(url, headers=headers, data=data)
-    json_result = result.json()
-    token = json_result.get("access_token")
+#     url = "https://accounts.spotify.com/api/token"
+#     headers = {
+#         "Authorization": "Basic " + auth_base64,
+#         "Content-Type": "application/x-www-form-urlencoded"
+#     }
+#     data = {"grant_type": "client_credentials"}
+#     result = requests.post(url, headers=headers, data=data)
+#     json_result = result.json()
+#     token = json_result.get("access_token")
 
-    if not token:
-        print("Error: Could not retrieve Spotify token.")
-        exit(1)
+#     if not token:
+#         print("Error: Could not retrieve Spotify token.")
+#         exit(1)
 
-    return token
+#     return token
+# ---------------------------------------------------------------------
 
 def get_auth_header(token):
     return {"Authorization": "Bearer " + token}
@@ -224,19 +227,3 @@ def spotify_logout(request):
     for key in keys_to_remove:
         request.session.pop(key, None)
     return redirect('playlists')  # Redirect to the playlists page, which will now show the login prompt
-
-
-# def spotify_logout(request):
-#     # Clear Spotify-related session data
-#     keys_to_remove = ['spotify_access_token', 'spotify_refresh_token']
-#     for key in keys_to_remove:
-#         request.session.pop(key, None)
-    
-#     # Clear Django's session
-#     request.session.flush()
-    
-#     # Logout the user if they're logged in with Django's auth system
-#     auth_logout(request)
-    
-#     messages.success(request, "You've been logged out from Spotify.")
-#     return redirect('playlists')  # Redirect to your home page or login page

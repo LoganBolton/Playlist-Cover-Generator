@@ -88,8 +88,8 @@ def analyze_vibe(features):
     
     return ", ".join(vibe) if vibe else "neutral"
 
-def get_playlist_details(PLAYLIST_ID):
-    token = spotify_auth.get_token()
+def get_playlist_details(PLAYLIST_ID, request):
+    token = spotify_auth.SpotifyTokenManager.get_token(request)
     tracks = get_playlist_tracks(token, PLAYLIST_ID)
 
     # Get audio features for all tracks
@@ -139,14 +139,14 @@ def get_playlist_details(PLAYLIST_ID):
     # Print the entire playlist description
     return playlist_description
 
-def get_prompt_and_cover(PLAYLIST_ID):
+def get_prompt_and_cover(PLAYLIST_ID, request):
     claude.set_up_claude()
-    spotify_auth.set_up_spotify()
+    # spotify_auth.set_up_spotify()
     
     # bossa = '6cGZkPs8wimEZBDzpVNaut'
     # jazz = '71vvwEbxgXqHZ7ONA6WGxt'
     # PLAYLIST_ID = '2djCZlngGykIYIvhRtPq39'
-    playlist_description = get_playlist_details(PLAYLIST_ID)
+    playlist_description = get_playlist_details(PLAYLIST_ID, request)
     prompt = f"""Give me a prompt that will be able represent this playlist in a latent diffusion model. Make it minimalist and abstract but still keep it interesting. I don't want hotel art level minimalism, I want something raw and artistic. If relevant, incorporate imagery that relates to the specific songs or artists. For example, if one of the tracks was named "The Girl from Ipanema", then it would be relevant to add the Ipanema beach to the prompt. Put your description in square brackets like this [description].\n\n{playlist_description}"""
     
     convo = claude.get_conversation(prompt)
