@@ -12,6 +12,9 @@ from django.core.cache import cache
 from django.shortcuts import redirect
 from django.http import HttpResponse
 from django.urls import reverse
+from django.contrib.auth import logout as auth_logout
+from django.shortcuts import redirect
+from django.contrib import messages
 
 
 class SpotifyTokenManager:
@@ -70,7 +73,7 @@ class SpotifyTokenManager:
 
 def spotify_auth(request):
     client_id = settings.SPOTIFY_CLIENT_ID
-    redirect_uri = 'http://127.0.0.1:8081/callback'  # Updated to match your server
+    redirect_uri = 'http://127.0.0.1:8081/callback'  
     scope = 'playlist-read-private playlist-read-collaborative'
 
     print(f"Redirect URI: {redirect_uri}")  # For debugging
@@ -129,7 +132,8 @@ def spotify_callback(request):
 
     print(f"Session after storing tokens: {dict(request.session)}")  # For debugging
 
-    return HttpResponse("Authorization successful! Tokens have been saved.")
+    print("Authorization successful! Tokens have been saved.")
+    return redirect('playlists')
 
 # Spotify
 def set_up_spotify():
@@ -207,3 +211,19 @@ def get_headers(request):
     }
     
     return headers
+
+
+def spotify_logout(request):
+    # Clear Spotify-related session data
+    keys_to_remove = ['spotify_access_token', 'spotify_refresh_token']
+    for key in keys_to_remove:
+        request.session.pop(key, None)
+    
+    # Clear Django's session
+    request.session.flush()
+    
+    # Logout the user if they're logged in with Django's auth system
+    auth_logout(request)
+    
+    messages.success(request, "You've been logged out from Spotify.")
+    return redirect('playlists')  # Redirect to your home page or login page
