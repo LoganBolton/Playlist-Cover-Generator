@@ -44,22 +44,16 @@ def generate_image(request, playlist_id):
         return render(request, 'playlister/error.html', {'error': error_message})
 
 def get_playlists(request):
+    if 'spotify_access_token' not in request.session:
+        return render(request, 'playlister/playlists.html', {'not_authenticated': True})
+    
     try:
-        # Check if the user is authenticated with Spotify
-        if 'spotify_access_token' not in request.session:
-            print("User is not authenticated")
-            return render(request, 'playlister/playlists.html', {'not_authenticated': True})
-
-            # If not authenticated, redirect to the Spotify authorization page
-            # return redirect('spotify_auth')
         headers = get_headers(request)
         response = requests.get('https://api.spotify.com/v1/me/playlists', headers=headers)
         
         if response.status_code == 401:  # Unauthorized, token might be expired
-            # Force refresh the token
             access_token = SpotifyTokenManager.refresh_token(request)
             headers['Authorization'] = f'Bearer {access_token}'
-            # Retry the request
             response = requests.get('https://api.spotify.com/v1/me/playlists', headers=headers)
 
         if response.status_code == 200:

@@ -26,6 +26,7 @@ h1 {
 }
 
 .header {
+    min-height: 42px;
     background-color: #121417;
     padding: 1rem;
     display: flex;
@@ -58,8 +59,24 @@ h1 {
     }
 }
 
+@media (max-width: 500px) {
+    .title-emoji {
+        display: none;
+    }
+}
+
 
 .generate-text {
     font-weight: bold;
     font-size: 18px;
+}
+
+.logout-button {
+    font-family: 'SpotifyFont', sans-serif;
+    font-size: 20px;
+    color: #EEEEEE;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: 20px;
 }

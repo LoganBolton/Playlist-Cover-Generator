@@ -83,41 +83,44 @@
     </style>
 </head>
 <div class="header">
-    <h1>Your Playlists 🎵🎵</h1>
-    <a href="{% url 'spotify_logout' %}">Logout from Spotify</a>
+    <h1>Your Playlists<span class='title-emoji'> 🎵🎵<span></h1>
+    <a class='logout-button' href="{% url 'spotify_logout' %}">Logout</a>
 </div>
 <body>
-    <div class="playlist-container">
-        {% if error %}
-            <p class="error-message">{{ error }}</p>
-        {% else %}
+    {% if not_authenticated %}
+        <div class="login-container">
+            <p>Please log in with Spotify to view your playlists.</p>
+            <a href="{% url 'spotify_auth' %}" class="login-button">Login with Spotify</a>
+        </div>
+    {% elif error %}
+        <p class="error-message">{{ error }}</p>
+    {% else %}
+        <div class="playlist-container">
             {% for playlist in playlists %}
-            <div class="playlist-item">
-                <div class="playlist-image">
-                    {% if playlist.images %}
-                        <img src="{{ playlist.images.0.url }}" alt="{{ playlist.name }}">
-                    {% else %}
-                        <span>No Image</span>
-                    {% endif %}
-                </div>
-                <div class="playlist-info">
-                    <div class="playlist-name">
-                        <p class ="playlist-text"> 
-                            {{ playlist.name }}
-                        </p>
-                        </div>
-                    <div>{{ playlist.tracks.total }} tracks</div>
-                </div>
-                <a href="{% url 'generate_image' playlist_id=playlist.id %}" class="generate-button">
-                    <div>
-                        <p class='generate-text'>Generate Cover 🖼️<p>
+                <div class="playlist-item">
+                    <div class="playlist-image">
+                        {% if playlist.images %}
+                            <img src="{{ playlist.images.0.url }}" alt="{{ playlist.name }}">
+                        {% else %}
+                            <span>No Image</span>
+                        {% endif %}
                     </div>
-                </a>
-            </div>
+                    <div class="playlist-info">
+                        <div class="playlist-name">
+                            <p class="playlist-text">{{ playlist.name }}</p>
+                        </div>
+                        <div>{{ playlist.tracks.total }} tracks</div>
+                    </div>
+                    <a href="{% url 'generate_image' playlist_id=playlist.id %}" class="generate-button">
+                        <div>
+                            <p class='generate-text'>Generate Cover 🖼️</p>
+                        </div>
+                    </a>
+                </div>
             {% empty %}
-            <p>No playlists found.</p>
+                <p>No playlists found.</p>
             {% endfor %}
-        {% endif %}
-    </div>
+        </div>
+    {% endif %}
 </body>
 </html>
