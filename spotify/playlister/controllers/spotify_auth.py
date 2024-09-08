@@ -200,7 +200,7 @@ def get_auth_header(token):
     return {"Authorization": "Bearer " + token}
 
 
-def prelim_spotify(request, playlist_id):
+def get_playlist_response(request, playlist_id):
     headers = get_headers(request)
     # Fetch the specific playlist
     response = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers)
@@ -214,7 +214,7 @@ def prelim_spotify(request, playlist_id):
     return response 
 
 def get_headers(request):
-    access_token = spotify_auth.SpotifyTokenManager.get_token(request)
+    access_token = SpotifyTokenManager.get_token(request)
 
     headers = {
         'Authorization': f'Bearer {access_token}',
