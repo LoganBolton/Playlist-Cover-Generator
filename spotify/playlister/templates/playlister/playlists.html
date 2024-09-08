@@ -9,22 +9,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Playlists</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #222831;
-            color: #EEEEEE;
-            margin: 0;
-            {% comment %} padding: 20px; {% endcomment %}
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
         .playlist-container {
             display: flex;
             flex-direction: column;
             gap: 20px;
-            max-width: 580px;
+            max-width: 500px;
             margin: 0 auto;
         }
         .playlist-item {
@@ -64,7 +53,7 @@
             margin-bottom: 5px;
         }
         .generate-button {
-            background-color: #76ABAE;
+            background-color: #6a9c9e;
             color: #EEEEEE;
             border: none;
             padding: 8px 12px;
@@ -83,17 +72,7 @@
             font-weight: bold;
         }
 
-        .header {
-            background-color: #121417;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-        .generate-text {
-            font-weight: bold;
-            font-size: 18px;
-        }
+
 
         .playlist-text {
             white-space: normal;
@@ -132,7 +111,7 @@
                     <div>
                         <p class='generate-text'>Generate Cover 🖼️<p>
                     </div>
-                    </a>
+                </a>
             </div>
             {% empty %}
             <p>No playlists found.</p>

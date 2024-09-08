@@ -6,10 +6,8 @@ from .utils import driver
 import requests
 from django.conf import settings
 import requests
-import time
 import base64
 from django.core.cache import cache
-from django.core.exceptions import ImproperlyConfigured
 
 from django.conf import settings
 from django.shortcuts import redirect
@@ -22,13 +20,6 @@ import urllib.parse
 def index(request):
     todo_list = TodoItem.objects.order_by('id')
     return render(request, 'playlister/index.html', {'todo_list': todo_list})
-
-# def generate_image(request, playlist_id, playlist_name):
-#     # prompt = driver(playlist_id)  # Call the driver function to get the image URL
-#     prompt = "testing debug prompt mmmm I love prompting language models with dynamic data mmmm " + playlist_id 
-#     image_url = ""
-#     # return render(request, 'playlister/display_image.html', {'image_url': image_url})
-#     return render(request, 'playlister/display_image.html', {'playlist_id': playlist_id, 'prompt': prompt, 'image_url': image_url, "playlist_name": playlist_name})
 
 def generate_image(request, playlist_id):
     try:
@@ -53,11 +44,10 @@ def generate_image(request, playlist_id):
             playlist = response.json()
             playlist_name = playlist['name']
             
-            # prompt = f"testing debug prompt for playlist: {playlist_name} (ID: {playlist_id})"
-            # prompt = driver(playlist_id)  # Call the driver function to get the image URL
-            prompt = "cool awesome image that's really cool and abstract and minimalist and stuff"
-            # image_url = driver(playlist_id)
-            image_url = ""
+            ## DEBUG CODE
+            prompt, image_url = driver(playlist_id)  # Call the driver function to get the image URL
+            # prompt = "cool awesome image that's really cool and abstract and minimalist and stuff"
+            # image_url = ""
             
             return render(request, 'playlister/display_image.html', {
                 'playlist_id': playlist_id,

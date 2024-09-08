@@ -99,20 +99,6 @@ def get_token():
 
     return token
 
-    auth_string = f"{CLIENT_ID}:{CLIENT_SECRET}"
-    auth_bytes = auth_string.encode("utf-8")
-    auth_base64 = str(base64.b64encode(auth_bytes), "utf-8")
-
-    url = "https://accounts.spotify.com/api/token"
-    headers = {
-        "Authorization": "Basic " + auth_base64,
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    data = {"grant_type": "client_credentials"}
-    result = requests.post(url, headers=headers, data=data)
-    json_result = result.json()
-    token = json_result["access_token"]
-    return token
 
 def get_auth_header(token):
     return {"Authorization": "Bearer " + token}
@@ -184,15 +170,19 @@ def get_playlist_details(PLAYLIST_ID):
     track_ids = [track['id'] for track in tracks]
     # print(f"token: {token}, track_ids: {track_ids}")
     audio_features = get_audio_features(token, track_ids)
+    valid_features = [f for f in audio_features if f is not None]
 
     # Calculate averages
-    avg_valence = mean(feature['valence'] for feature in audio_features)
-    avg_energy = mean(feature['energy'] for feature in audio_features)
-
+    try:
+        avg_valence = mean(feature['valence'] for feature in valid_features)
+        avg_energy = mean(feature['energy'] for feature in valid_features)
+    except:
+        avg_valence = 0
+        avg_energy = 0
     # print(f"Tracks in the playlist (total: {len(tracks)}):")
     playlist_description = ""
 
-    for i, (track, features) in enumerate(zip(tracks, audio_features), 1):
+    for i, (track, features) in enumerate(zip(tracks, valid_features), 1):
         vibe = analyze_vibe(features)
         playlist_description += f"{i}. {track['name']} by {track['artist']}\n"
         playlist_description += f"   Vibe: {vibe}\n"
@@ -229,18 +219,18 @@ def driver(PLAYLIST_ID):
     
     # bossa = '6cGZkPs8wimEZBDzpVNaut'
     # jazz = '71vvwEbxgXqHZ7ONA6WGxt'
-    PLAYLIST_ID = '2djCZlngGykIYIvhRtPq39'
+    # PLAYLIST_ID = '2djCZlngGykIYIvhRtPq39'
     playlist_description = get_playlist_details(PLAYLIST_ID)
     prompt = f"""Give me a prompt that will be able represent this playlist in a latent diffusion model. Make it minimalist and abstract but still keep it interesting. I don't want hotel art level minimalism, I want something raw and artistic. If relevant, incorporate imagery that relates to the specific songs or artists. Put your description in square brackets like this [description].\n\n{playlist_description}"""
     
-    # convo = get_conversation(prompt)
-    # response = send_message(convo)
-    # description = extract_description(response)
-    # return description
+    convo = get_conversation(prompt)
+    response = send_message(convo)
+    description = extract_description(response)
+    # return description, ""
 
     #temporarily commented out 
     # print(description)
-    description = "really cool awesome image that's really cool and abstract and minimalist and stuff"
+    # description = "really cool awesome image that's really cool and abstract and minimalist and stuff"
     output = replicate.run(
         "black-forest-labs/flux-schnell",
         input={
@@ -251,7 +241,7 @@ def driver(PLAYLIST_ID):
             "output_quality": 80
         }
     )
-    print(output)
+    # print(output)
     image_url = output[0]
 
-    return image_url
+    return description, image_url
