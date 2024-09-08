@@ -51,11 +51,16 @@ def get_playlist_tracks(token, playlist_id):
 
 # Get audio features for tracks
 def get_audio_features(token, track_ids):
+    track_ids = track_ids[:99]  # Spotify API only allows 100 track IDs at a time
     url = f"https://api.spotify.com/v1/audio-features"
     headers = spotify_auth.get_auth_header(token)
     params = {'ids': ','.join(track_ids)}
-    
+    print()
+    print(headers)
+    print(params)
+    print()
     result = requests.get(url, headers=headers, params=params)
+
     return result.json()['audio_features']
 
 # Analyze vibe based on audio features
