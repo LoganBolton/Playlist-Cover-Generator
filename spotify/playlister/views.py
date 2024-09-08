@@ -2,7 +2,10 @@ from django.shortcuts import render, redirect
 from .models import TodoItem
 from django.views.decorators.http import require_POST
 from django.conf import settings
+
 from .utils import driver
+# from .utils import prelim_spotify
+
 import requests
 from django.conf import settings
 import requests
@@ -39,6 +42,7 @@ def generate_image(request, playlist_id):
             headers['Authorization'] = f'Bearer {access_token}'
             # Retry the request
             response = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers)
+        # response = prelim_spotify(request, playlist_id)
 
         if response.status_code == 200:
             playlist = response.json()
