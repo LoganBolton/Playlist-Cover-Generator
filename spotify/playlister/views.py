@@ -5,14 +5,12 @@ from django.core.cache import cache
 from django.shortcuts import redirect
 from django.http import HttpResponse
 from django.urls import reverse
+import requests
 
 from .utils import driver
 from .controllers.spotify_auth import SpotifyTokenManager
 from .controllers.spotify_auth import get_headers
 from .controllers.spotify_auth import get_playlist_response
-
-
-import requests
 
 
 def index(request):
@@ -47,7 +45,6 @@ def generate_image(request, playlist_id):
 def get_playlists(request):
     try:
         headers = get_headers(request)
-
         response = requests.get('https://api.spotify.com/v1/me/playlists', headers=headers)
         
         if response.status_code == 401:  # Unauthorized, token might be expired

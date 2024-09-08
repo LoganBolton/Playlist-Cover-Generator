@@ -1,30 +1,17 @@
 import requests
-import base64
 import os
-import anthropic
-import base64
-from anthropic import Anthropic
 from PIL import Image
-import replicate
 import requests
-from statistics import mean 
+import base64
+import urllib.parse
 
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from django.conf import settings
-import requests
-from django.conf import settings
-import requests
-import base64
 from django.core.cache import cache
-
-from django.conf import settings
 from django.shortcuts import redirect
 from django.http import HttpResponse
 from django.urls import reverse
-import requests
-import base64
-import urllib.parse
 
 
 class SpotifyTokenManager:
@@ -198,7 +185,6 @@ def get_token():
 
 def get_auth_header(token):
     return {"Authorization": "Bearer " + token}
-
 
 def get_playlist_response(request, playlist_id):
     headers = get_headers(request)
