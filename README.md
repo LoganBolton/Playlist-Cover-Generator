@@ -1,6 +1,13 @@
+# Description
+This project integrates with a user's Spotify account and then creates an image representation of a user's playlist using AI. The
+models used are Claude 3.5 Sonnet and Flux.1-schnell.
+
+
+![Cover Image](playlists.png)
+![Cover Image](cover.png)
+
 ## Spotify Auth
 if auth breaks go to : (http://127.0.0.1:8081/spotify/auth/) and pray
-
 
 ## color pallet
 
