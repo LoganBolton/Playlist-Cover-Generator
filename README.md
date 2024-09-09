@@ -14,4 +14,16 @@ rgb(118, 171, 174)
 rgb(238, 238, 238)
 
 
-scp -i ~/FirstKey.pem -r spotify ubuntu@ec2-3-145-147-169.us-east-2.compute.amazonaws.com:~/
+## Push to Prod
+"scp -i ~/FirstKey.pem -r spotify ubuntu@ec2-3-145-147-169.us-east-2.compute.amazonaws.com:~/"
+
+## Ideas
+- Add image download button
+- Add button that adds generated image to actual playlist
+- Fine tune on album artwork - Lora?
+- Effeciency
+    - Add loading bar
+    - Make it so that it loads the template and then loads the prompt and image
+- Save a record of all the images that people save
+    - Want to do some analysis of why these images were chosen
+    - A/B prompt testing

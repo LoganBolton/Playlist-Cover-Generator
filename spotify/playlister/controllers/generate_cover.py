@@ -147,7 +147,7 @@ def get_prompt_and_cover(PLAYLIST_ID, request):
     # jazz = '71vvwEbxgXqHZ7ONA6WGxt'
     # PLAYLIST_ID = '2djCZlngGykIYIvhRtPq39'
     playlist_description = get_playlist_details(PLAYLIST_ID, request)
-    prompt = f"""Give me a prompt that will be able represent this playlist in a latent diffusion model. Make it minimalist and abstract but still keep it interesting. I don't want hotel art level minimalism, I want something raw and artistic. If relevant, incorporate imagery that relates to the specific songs or artists. For example, if one of the tracks was named "The Girl from Ipanema", then it would be relevant to add the Ipanema beach to the prompt. Put your description in square brackets like this [description].\n\n{playlist_description}"""
+    prompt = f"""Give me a prompt that will be able represent this playlist in a latent diffusion model. Make it minimalist and abstract but still keep it interesting. I don't want hotel art level minimalism, I want something raw and artistic. If relevant, incorporate imagery that relates to the specific songs or artists. For example, if one of the tracks was named "The Girl from Ipanema", then it would be relevant to add a description of the Ipanema beach to the prompt. Put your description in square brackets like this [description].\n\n{playlist_description}"""
     
     convo = claude.get_conversation(prompt)
     response = claude.send_message(convo)
